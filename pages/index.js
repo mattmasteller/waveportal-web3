@@ -1,5 +1,5 @@
 const HomePage = () => (
-  <div className="bg-white py-16 sm:py-24">
+  <div className="bg-white py-8 sm:py-0">
     <div className="relative sm:py-16">
       <div aria-hidden="true" className="hidden sm:block">
         <div className="absolute inset-y-0 left-0 w-1/2 bg-gray-50 rounded-r-3xl" />
@@ -73,12 +73,11 @@ const HomePage = () => (
             </div>
             <form action="#" className="mt-12 sm:mx-auto sm:max-w-lg sm:flex">
               <div className="min-w-0 flex-1">
-                <label htmlFor="cta-email" className="sr-only">
+                <label htmlFor="cta-message" className="sr-only">
                   Enter your message here :)
                 </label>
                 <input
-                  id="cta-email"
-                  type="email"
+                  id="cta-message"
                   className="block w-full border border-transparent rounded-md px-5 py-3 text-base text-gray-900 placeholder-gray-500 shadow-sm focus:outline-none focus:border-transparent focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
                   placeholder="Enter your message here :)"
                 />
