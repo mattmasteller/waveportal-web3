@@ -67,9 +67,8 @@ const HomePage = () => (
                 Hey! 👋 &nbsp; I&rsquo;m Matt.
               </h2>
               <p className="mt-6 mx-auto max-w-2xl text-lg text-indigo-200">
-                Wave at me on the Ethereum blockchain! Maybe send a sweet
-                message too? Connect your wallet, write your message, and then
-                wave 👋 .
+                Wave at me on the Ethereum blockchain! Maybe send a message too?
+                Connect your wallet, write your message, and then wave 👋 .
               </p>
             </div>
             <form action="#" className="mt-12 sm:mx-auto sm:max-w-lg sm:flex">
