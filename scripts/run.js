@@ -1,3 +1,5 @@
+// yarn hardhat run scripts/run.js
+
 const main = async () => {
   const [owner, randomPerson] = await hre.ethers.getSigners()
   const waveContractFactory = await hre.ethers.getContractFactory('WavePortal')
