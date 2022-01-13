@@ -1,4 +1,4 @@
-// yarn hardhat run scripts/run.js
+// yarn hardhat run ethereum/scripts/run.js
 
 const main = async () => {
   const [owner, randomPerson] = await hre.ethers.getSigners()
