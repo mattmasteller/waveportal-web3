@@ -13,3 +13,7 @@ npx hardhat node
 node scripts/sample-script.js
 npx hardhat help
 ```
+
+# Waveportal Address (Rinkeby)
+
+0x1DB81a7A02b1A272BFD8f7Ec8d0b1329E9ba02F0

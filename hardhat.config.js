@@ -19,12 +19,12 @@ task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
  */
 module.exports = {
   solidity: '0.8.4',
-  // networks: {
-  //   rinkeby: {
-  //     url: process.env.NETWORK_URL,
-  //     accounts: [process.env.PRIVATE_KEY_1],
-  //   },
-  // },
+  networks: {
+    rinkeby: {
+      url: process.env.NETWORK_URL,
+      accounts: [process.env.PRIVATE_KEY_1],
+    },
+  },
   paths: {
     sources: './ethereum/contracts',
     tests: './ethereum/test',
