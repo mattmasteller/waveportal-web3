@@ -1,7 +1,13 @@
+import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
+import abi from '../utils/WavePortal.json'
 
 const HomePage = () => {
   const [currentAccount, setCurrentAccount] = useState('')
+  const [waveCount, setWaveCount] = useState(0)
+  const [isMining, setIsMining] = useState(false)
+  const contractAddress = '0x1DB81a7A02b1A272BFD8f7Ec8d0b1329E9ba02F0' // process.env.CONTRACT_ADDRESS
+  const contractABI = abi.abi
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -12,6 +18,16 @@ const HomePage = () => {
         return
       } else {
         console.log('We have the ethereum object', ethereum)
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        )
+        const count = await getNumberOfWaves()
+        console.log('count', count)
+        setWaveCount(count)
       }
 
       const accounts = await ethereum.request({ method: 'eth_accounts' })
@@ -26,6 +42,21 @@ const HomePage = () => {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  const getNumberOfWaves = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(
+      'https://eth-rinkeby.alchemyapi.io/v2/OV9WPSQh0LDP86kyqyv3SMGe-CjbkbkQ'
+    )
+    const wavePortalContract = new ethers.Contract(
+      contractAddress,
+      contractABI,
+      provider
+    )
+
+    const count = await wavePortalContract.getTotalWaves()
+
+    return count.toNumber()
   }
 
   const connectWallet = async () => {
@@ -43,6 +74,47 @@ const HomePage = () => {
 
       setCurrentAccount(accounts[0])
     } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const wave = async () => {
+    try {
+      const { ethereum } = window
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const wavePortalContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        )
+
+        // let count = await wavePortalContract.getTotalWaves()
+        let count = await getNumberOfWaves()
+        console.log('Retrieved total wave count...', count.toNumber())
+
+        /*
+         * Execute the actual wave from your smart contract
+         */
+        setIsMining(true)
+        const waveTxn = await wavePortalContract.wave()
+        console.log('Mining...', waveTxn.hash)
+
+        await waveTxn.wait()
+        console.log('Mined -- ', waveTxn.hash)
+        setIsMining(false)
+
+        // count = await wavePortalContract.getTotalWaves()
+        count = await getNumberOfWaves()
+        console.log('Retrieved total wave count...', count.toNumber())
+      } else {
+        console.log('Ethereum object does not exist!')
+      }
+    } catch (error) {
+      console.log('contractAddress', contractAddress)
+      console.log('contractABI', contractABI)
       console.log(error)
     }
   }
@@ -116,9 +188,9 @@ const HomePage = () => {
             </div>
             <div className="relative">
               <div className="sm:text-center">
-                <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+                <h1 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
                   Hey! 👋 &nbsp; I&rsquo;m Matt.
-                </h2>
+                </h1>
                 <p className="mt-6 mx-auto max-w-2xl text-lg text-indigo-200">
                   Wave at me on the Ethereum blockchain! Maybe send a message
                   too? Connect your wallet, write your message, and then wave 👋
@@ -127,24 +199,22 @@ const HomePage = () => {
               </div>
               <div className="mt-4 text-center text-lg text-indigo-200">
                 {currentAccount && (
-                  <div>
+                  <span>
                     ✅ &nbsp;&nbsp;Wallet connected!&nbsp;&nbsp;
                     {currentAccount.substring(0, 5)}...
                     {currentAccount.substring(37)}
-                  </div>
+                  </span>
                 )}
               </div>
               {currentAccount ? (
-                <form
-                  action="#"
-                  className="mt-8 sm:mx-auto sm:max-w-lg sm:flex"
-                >
+                <div className="mt-8 sm:mx-auto sm:max-w-lg sm:flex">
                   <div className="min-w-0 flex-1">
                     <label htmlFor="cta-message" className="sr-only">
                       Enter your message here :)
                     </label>
                     <input
                       id="cta-message"
+                      disabled={isMining}
                       className="block w-full border border-transparent rounded-md px-5 py-3 text-base text-gray-900 placeholder-gray-500 shadow-sm focus:outline-none focus:border-transparent focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
                       placeholder="Enter your message here :)"
                     />
@@ -152,15 +222,17 @@ const HomePage = () => {
                   <div className="mt-4 sm:mt-0 sm:ml-3">
                     <button
                       type="submit"
+                      disabled={isMining}
                       className="block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-500 text-base font-medium text-white shadow hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10"
+                      onClick={wave}
                     >
-                      Wave at me!
+                      {isMining ? 'Mining...' : 'Wave at me!'}
                     </button>
                   </div>
-                </form>
+                </div>
               ) : (
-                <div action="#" className="mt-12 sm:mx-auto sm:max-w-lg">
-                  <div className="mt-4 sm:mt-0 sm:ml-3">
+                <div className="mt-8 sm:mx-auto sm:max-w-lg">
+                  <div className="mt-8 sm:mt-0 sm:ml-3">
                     <button
                       className="block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-500 text-base font-medium text-white shadow hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10"
                       onClick={connectWallet}
@@ -174,6 +246,11 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+      {waveCount && (
+        <h2 className="mt-8 text-center text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+          {waveCount} Waves
+        </h2>
+      )}
     </div>
   )
 }
