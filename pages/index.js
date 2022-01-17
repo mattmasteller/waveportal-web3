@@ -24,8 +24,12 @@ const HomePage = () => {
       message: w.message,
     }))
 
-    console.log('fetchWaves wavesData :>> ', wavesData)
-    setWaves(wavesData)
+    const sortedWavesData = wavesData.sort((a, b) =>
+      a.timestamp > b.timestamp ? -1 : 1
+    )
+
+    console.log('fetchWaves sortedWavesData :>> ', sortedWavesData)
+    setWaves(sortedWavesData)
   }
 
   const checkIfWalletIsConnected = async () => {
@@ -97,6 +101,7 @@ const HomePage = () => {
         await waveTxn.wait()
         console.log('Mined -- ', waveTxn.hash)
         setIsMining(false)
+        fetchWaves()
       } else {
         console.log('Ethereum object does not exist!')
       }
