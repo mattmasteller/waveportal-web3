@@ -91,7 +91,7 @@ const HomePage = () => {
          * Execute the actual wave from your smart contract
          */
         setIsMining(true)
-        const waveTxn = await contract.wave('yo, this is test message')
+        const waveTxn = await contract.wave('yo, this is a test message')
         console.log('Mining...', waveTxn.hash)
 
         await waveTxn.wait()
