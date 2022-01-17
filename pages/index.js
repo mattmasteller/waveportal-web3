@@ -1,13 +1,32 @@
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
+import WavesList from '../components/WavesList'
 import abi from '../utils/WavePortal.json'
 
 const HomePage = () => {
   const [currentAccount, setCurrentAccount] = useState('')
-  const [waveCount, setWaveCount] = useState(0)
+  const [waves, setWaves] = useState([])
   const [isMining, setIsMining] = useState(false)
-  const contractAddress = '0x1DB81a7A02b1A272BFD8f7Ec8d0b1329E9ba02F0' // process.env.CONTRACT_ADDRESS
+
+  const providerUrl =
+    'https://eth-rinkeby.alchemyapi.io/v2/OV9WPSQh0LDP86kyqyv3SMGe-CjbkbkQ'
+  const contractAddress = '0x8B4e0a9f75470d1ccDE8CED3A83E558239d14D9A' // process.env.CONTRACT_ADDRESS
   const contractABI = abi.abi
+
+  const fetchWaves = async () => {
+    const provider = new ethers.providers.JsonRpcProvider(providerUrl)
+    const contract = new ethers.Contract(contractAddress, contractABI, provider)
+    const waves = await contract.getAllWaves()
+
+    const wavesData = waves.map((w) => ({
+      address: w.waver,
+      timestamp: new Date(w.timestamp * 1000),
+      message: w.message,
+    }))
+
+    console.log('fetchWaves wavesData :>> ', wavesData)
+    setWaves(wavesData)
+  }
 
   const checkIfWalletIsConnected = async () => {
     try {
@@ -18,16 +37,6 @@ const HomePage = () => {
         return
       } else {
         console.log('We have the ethereum object', ethereum)
-        const provider = new ethers.providers.Web3Provider(ethereum)
-        const signer = provider.getSigner()
-        const wavePortalContract = new ethers.Contract(
-          contractAddress,
-          contractABI,
-          signer
-        )
-        const count = await getNumberOfWaves()
-        console.log('count', count)
-        setWaveCount(count)
       }
 
       const accounts = await ethereum.request({ method: 'eth_accounts' })
@@ -44,21 +53,6 @@ const HomePage = () => {
     }
   }
 
-  const getNumberOfWaves = async () => {
-    const provider = new ethers.providers.JsonRpcProvider(
-      'https://eth-rinkeby.alchemyapi.io/v2/OV9WPSQh0LDP86kyqyv3SMGe-CjbkbkQ'
-    )
-    const wavePortalContract = new ethers.Contract(
-      contractAddress,
-      contractABI,
-      provider
-    )
-
-    const count = await wavePortalContract.getTotalWaves()
-
-    return count.toNumber()
-  }
-
   const connectWallet = async () => {
     try {
       const { ethereum } = window
@@ -68,7 +62,9 @@ const HomePage = () => {
         return
       }
 
-      const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      })
 
       console.log('Connected', accounts[0])
 
@@ -85,30 +81,22 @@ const HomePage = () => {
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum)
         const signer = provider.getSigner()
-        const wavePortalContract = new ethers.Contract(
+        const contract = new ethers.Contract(
           contractAddress,
           contractABI,
           signer
         )
 
-        // let count = await wavePortalContract.getTotalWaves()
-        let count = await getNumberOfWaves()
-        console.log('Retrieved total wave count...', count.toNumber())
-
         /*
          * Execute the actual wave from your smart contract
          */
         setIsMining(true)
-        const waveTxn = await wavePortalContract.wave()
+        const waveTxn = await contract.wave('yo, this is test message')
         console.log('Mining...', waveTxn.hash)
 
         await waveTxn.wait()
         console.log('Mined -- ', waveTxn.hash)
         setIsMining(false)
-
-        // count = await wavePortalContract.getTotalWaves()
-        count = await getNumberOfWaves()
-        console.log('Retrieved total wave count...', count.toNumber())
       } else {
         console.log('Ethereum object does not exist!')
       }
@@ -120,6 +108,7 @@ const HomePage = () => {
   }
 
   useEffect(() => {
+    fetchWaves()
     checkIfWalletIsConnected()
   }, [])
 
@@ -161,7 +150,7 @@ const HomePage = () => {
             />
           </svg>
         </div>
-        <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-7xl lg:px-8">
+        <div className="mx-auto max-w-md px-4 sm:max-w-3xl sm:px-6 lg:max-w-5xl lg:px-8">
           <div className="relative rounded-2xl px-6 py-10 bg-indigo-600 overflow-hidden shadow-xl sm:px-12 sm:py-20">
             <div
               aria-hidden="true"
@@ -202,7 +191,7 @@ const HomePage = () => {
                   <span>
                     ✅ &nbsp;&nbsp;Wallet connected!&nbsp;&nbsp;
                     {currentAccount.substring(0, 5)}...
-                    {currentAccount.substring(37)}
+                    {currentAccount.substring(38)}
                   </span>
                 )}
               </div>
@@ -246,10 +235,13 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      {waveCount && (
-        <h2 className="mt-8 text-center text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
-          {waveCount} Waves
-        </h2>
+      {waves && waves.length > 0 && (
+        <div>
+          <h2 className="mt-8 text-center text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">
+            {waves.length} Wave{waves.length > 1 ? 's' : ''}
+          </h2>
+          <WavesList waves={waves} />
+        </div>
       )}
     </div>
   )
