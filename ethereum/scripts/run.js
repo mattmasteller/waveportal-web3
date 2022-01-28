@@ -21,31 +21,38 @@ const main = async () => {
   await waveContract.deployed()
   console.log('Contract deployed to:', waveContract.address)
 
-  /*
-   * Get contract balance
-   */
-  await logContractBalance(hre, waveContract)
-  /*
-   * Send wave
-   */
-  let waveTxn = await waveContract.wave('A message!')
-  await waveTxn.wait() // Wait for txn to be mined
-  /*
-   * Get contract balance
-   */
+  // Get contract balance
   await logContractBalance(hre, waveContract)
 
   /*
-   * Send another wave
+   * 1st Wave (User #1)
+   */
+  let waveTxn = await waveContract.wave('Message #1')
+  await waveTxn.wait() // Wait for txn to be mined
+  // Get contract balance
+  await logContractBalance(hre, waveContract)
+
+
+  /*
+   * 2nd Wave (User #2)
    */
   const [_, randomPerson] = await hre.ethers.getSigners()
-  waveTxn = await waveContract.connect(randomPerson).wave('Another message!')
+  waveTxn = await waveContract.connect(randomPerson).wave('Message #2')
   await waveTxn.wait() // Wait for txn to be mined
-  /*
-   * Get contract balance
-   */
+  // Get contract balance
   await logContractBalance(hre, waveContract)
 
+
+
+  /*
+   * 3rd Wave (User #1) (should fail)
+   */
+  waveTxn = await waveContract.wave('Message #3')
+  await waveTxn.wait() // Wait for txn to be mined
+  // Get contract balance
+  await logContractBalance(hre, waveContract)
+
+  
   /*
    * Log wave count and waves
    */

@@ -19,6 +19,9 @@ contract WavePortal {
     // Array of all waves.
     Wave[] waves;
 
+    // Cooldown mapping
+    mapping(address => uint256) public lastWavedAt;
+
     constructor() payable {
         console.log("Yo yo, I am a contract and I am smart");
 
@@ -27,6 +30,11 @@ contract WavePortal {
     }
 
     function wave(string memory _message) public {
+        // Guard against spammers. Require 15 mins between waves. 
+        require(lastWavedAt[msg.sender] + 15 minutes < block.timestamp, "Wait 15 mins");
+        // Update current timestamp.
+        lastWavedAt[msg.sender] = block.timestamp;
+
         totalWaves += 1;
         console.log("%s waved w/ message %s", msg.sender, _message);
 
