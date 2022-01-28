@@ -8,9 +8,8 @@ const HomePage = () => {
   const [waves, setWaves] = useState([])
   const [isMining, setIsMining] = useState(false)
 
-  const providerUrl =
-    'https://eth-rinkeby.alchemyapi.io/v2/OV9WPSQh0LDP86kyqyv3SMGe-CjbkbkQ'
-  const contractAddress = '0x8B4e0a9f75470d1ccDE8CED3A83E558239d14D9A' // process.env.CONTRACT_ADDRESS
+  const providerUrl = process.env.NEXT_PUBLIC_NETWORK_URL
+  const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS
   const contractABI = abi.abi
 
   const fetchWaves = async () => {
@@ -92,7 +91,7 @@ const HomePage = () => {
         )
 
         /*
-         * Execute the actual wave from your smart contract
+         * Execute the actual wave from smart contract
          */
         setIsMining(true)
         const waveTxn = await contract.wave('yo, this is a test message')
