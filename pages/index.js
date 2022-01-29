@@ -1,9 +1,15 @@
-import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
+import { ethers } from 'ethers'
+import { useForm } from 'react-hook-form'
+
 import WavesList from '../components/WavesList'
 import abi from '../utils/WavePortal.json'
 
 const HomePage = () => {
+  const { register, handleSubmit, formState, reset } = useForm({
+    mode: 'onChange',
+  })
+
   const [currentAccount, setCurrentAccount] = useState('')
   const [waves, setWaves] = useState([])
   const [isMining, setIsMining] = useState(false)
@@ -77,7 +83,9 @@ const HomePage = () => {
     }
   }
 
-  const wave = async () => {
+  const onSubmit = async (data) => {
+    const { message } = data
+
     try {
       const { ethereum } = window
 
@@ -94,12 +102,13 @@ const HomePage = () => {
          * Execute the actual wave from smart contract
          */
         setIsMining(true)
-        const waveTxn = await contract.wave('yo, this is a test message')
+        const waveTxn = await contract.wave(message, { gasLimit: 300000 })
         console.log('Mining...', waveTxn.hash)
 
         await waveTxn.wait()
         console.log('Mined -- ', waveTxn.hash)
         setIsMining(false)
+        reset()
         fetchWaves()
       } else {
         console.log('Ethereum object does not exist!')
@@ -108,12 +117,25 @@ const HomePage = () => {
       console.log('contractAddress', contractAddress)
       console.log('contractABI', contractABI)
       console.log(error)
+      alert(error)
+      setIsMining(false)
+      reset()
     }
   }
 
   useEffect(() => {
-    fetchWaves()
     checkIfWalletIsConnected()
+    fetchWaves()
+
+    const provider = new ethers.providers.JsonRpcProvider(providerUrl)
+    const contract = new ethers.Contract(contractAddress, contractABI, provider)
+    contract.on('NewWave', fetchWaves)
+
+    return () => {
+      if (contract) {
+        contract.off('NewWave', fetchWaves)
+      }
+    }
   }, [])
 
   return (
@@ -200,29 +222,36 @@ const HomePage = () => {
                 )}
               </div>
               {currentAccount ? (
-                <div className="mt-8 sm:mx-auto sm:max-w-lg sm:flex">
+                <form
+                  className="mt-8 sm:mx-auto sm:max-w-lg sm:flex"
+                  onSubmit={handleSubmit(onSubmit)}
+                >
                   <div className="min-w-0 flex-1">
-                    <label htmlFor="cta-message" className="sr-only">
+                    <label htmlFor="message" className="sr-only">
                       Enter your message here :)
                     </label>
                     <input
-                      id="cta-message"
+                      id="message"
                       disabled={isMining}
                       className="block w-full border border-transparent rounded-md px-5 py-3 text-base text-gray-900 placeholder-gray-500 shadow-sm focus:outline-none focus:border-transparent focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
                       placeholder="Enter your message here :)"
+                      {...register('message', { required: true })}
                     />
                   </div>
                   <div className="mt-4 sm:mt-0 sm:ml-3">
                     <button
                       type="submit"
-                      disabled={isMining}
-                      className="block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-500 text-base font-medium text-white shadow hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10"
-                      onClick={wave}
+                      disabled={isMining || !formState.isValid}
+                      className={`${
+                        !isMining && formState.isValid
+                          ? 'hover:bg-indigo-400'
+                          : ''
+                      } block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-500 text-base font-medium text-white shadow  focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10`}
                     >
                       {isMining ? 'Mining...' : 'Wave at me!'}
                     </button>
                   </div>
-                </div>
+                </form>
               ) : (
                 <div className="mt-8 sm:mx-auto sm:max-w-lg">
                   <div className="mt-8 sm:mt-0 sm:ml-3">
