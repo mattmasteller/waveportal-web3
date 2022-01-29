@@ -1,5 +1,5 @@
 // yarn hardhat node
-// yarn hardhat run ethereum/scripts/deploy.js --network localhost|rinkeby
+// yarn hardhat run ethereum/scripts/deploy.js --network rinkeby|localhost
 
 const main = async () => {
   const [deployer] = await hre.ethers.getSigners()
