@@ -1,4 +1,4 @@
-/* This example requires Tailwind CSS v2.0+ */
+import { format } from 'date-fns'
 import { CalendarIcon, UserIcon } from '@heroicons/react/solid'
 
 const Wave = ({ wave }) => (
@@ -13,7 +13,7 @@ const Wave = ({ wave }) => (
       <div className="mt-2 flex items-center">
         <CalendarIcon className="h-8 text-indigo-50" />
         <div className="ml-2 text-xl text-indigo-200">
-          {wave.timestamp.toString()}
+          {format(wave.timestamp, 'P p')}
         </div>
       </div>
     </div>
