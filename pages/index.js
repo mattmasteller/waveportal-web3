@@ -244,9 +244,9 @@ const HomePage = () => {
                       disabled={isMining || !formState.isValid}
                       className={`${
                         !isMining && formState.isValid
-                          ? 'hover:bg-indigo-400'
-                          : ''
-                      } block w-full rounded-md border border-transparent px-5 py-3 bg-indigo-500 text-base font-medium text-white shadow  focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10`}
+                          ? 'hover:bg-indigo-400 bg-indigo-500 text-white'
+                          : 'bg-indigo-400 text-indigo-200'
+                      } block w-full rounded-md border border-transparent px-5 py-3 text-base font-medium shadow  focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600 sm:px-10`}
                     >
                       {isMining ? 'Mining...' : 'Wave at me!'}
                     </button>
